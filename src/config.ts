@@ -1,4 +1,4 @@
-export const APP_NAME = process.env.APP_NAME || "Tahfiz Community";
+export const APP_NAME = process.env.APP_NAME || "Tilawah Tracker";
 
 export const GOOGLE_REDIRECT_URI =
     process.env.GOOGLE_REDIRECT_URI ||

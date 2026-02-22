@@ -1,41 +1,39 @@
-# Quran Tahfiz Tracker
+# Tilawah Tracker
 
-A Quran memorization (tahfiz) and reading (iqra) progress tracking app for communities. Members log their hafalan progress surah by surah, and a leaderboard keeps everyone motivated.
-
-![Quran Tahfiz Tracker](https://imgmu.id/f/ae0c0cc.png)
+A Quran reading (tilawah) progress tracking app for communities during Ramadan. Members log their reading position (surah:ayah), and a leaderboard keeps everyone motivated.
 
 ## Features
 
-- **Google OAuth** — sign in with Google; new accounts go into a pending state until an admin approves them
-- **Progress tracking** — log how far you've memorized in each surah (by ayah), with full history in a progress log
-- **Juz completion** — automatically computed from surah/ayah progress across all 30 juz
-- **Leaderboard** — ranked by juz completed or total ayahs memorized, with top-3 podium cards, search, and pagination
-- **Personal dashboard** — see your overall percentage, juz count, current location in the Quran, and your rank
-- **Admin panel** — approve/reject pending users and change member roles
+- **Username/Password Auth** — sign in with username and password; new accounts go into a pending state until an admin approves them
+- **Progress tracking** — log your current position (surah:ayah), with full history of updates
+- **Khatam tracking** — automatically computed from position progress (1x, 2x, etc khatam)
+- **Leaderboard** — ranked by khatam completed, with top-3 podium cards, search, and pagination
+- **Personal dashboard** — see your overall percentage, khatam count, current position in the Quran, and your rank
+- **Admin panel** — approve/reject pending users, set target khatam, Ramadan year, and reset progress
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Runtime | [Bun](https://bun.sh) |
+| Runtime | [Node.js](https://nodejs.org) |
 | Framework | [Hono](https://hono.dev) (JSX SSR) |
-| Database | SQLite via `bun:sqlite` |
+| Database | SQLite via `better-sqlite3` |
 | Styling | TailwindCSS (CDN) |
-| Auth | Google OAuth 2.0 |
+| Auth | Username/Password (bcrypt) |
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) v1.0+
-- A Google Cloud project with OAuth 2.0 credentials
+- [Node.js](https://nodejs.org) v20+
+- npm or yarn
 
 ### 1. Clone and install
 
 ```bash
 git clone <repo-url>
 cd ngaji
-bun install
+npm install
 ```
 
 ### 2. Configure environment
@@ -43,55 +41,39 @@ bun install
 Create a `.env` file in the project root:
 
 ```env
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+APP_NAME=Tilawah Tracker
 APP_URL=http://localhost:3000
 PORT=3000
-```
-
-Set the authorized redirect URI in your Google Cloud Console to:
-
-```
-http://localhost:3000/auth/google/callback
 ```
 
 ### 3. Run
 
 ```bash
 # Development (hot reload)
-bun run dev
+npm run dev
 
 # Production
-bun run start
+npm start
 ```
 
 The app will be available at `http://localhost:3000`.
 
-> **No build step required.** Bun executes TypeScript directly, and TailwindCSS is loaded from CDN. `bun run start` is the production command — there is no `bun run build`.
+> **No build step required.** Node.js executes TypeScript via tsx, and TailwindCSS is loaded from CDN.
 
 ## Deploying to Production
 
-Since there is no build step, deploying is just running `bun run start` with the right environment variables set.
+Deploy using Node.js with PM2 or similar process manager.
 
 ### Environment variables for production
 
 ```env
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+APP_NAME=Tilawah Tracker
 APP_URL=https://your-domain.com
 PORT=3000
 NODE_ENV=production
 ```
 
-Update the authorized redirect URI in Google Cloud Console to match your domain:
-
-```
-https://your-domain.com/auth/google/callback
-```
-
 ### PM2 (Linux VPS)
-
-Use the included `ecosystem.config.cjs` to avoid Bun/PM2 compatibility issues:
 
 ```bash
 npm install -g pm2
@@ -124,23 +106,23 @@ sudo ln -s /etc/nginx/sites-available/ngaji /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-The config handles HTTP → HTTPS redirect, SSL termination, and proxying to the Bun app on `PORT`.
+The config handles HTTP → HTTPS redirect, SSL termination, and proxying to the Node.js app on `PORT`.
 
 ### Docker
 
 ```dockerfile
-FROM oven/bun:1
+FROM node:20-alpine
 WORKDIR /app
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+CMD ["npm", "start"]
 ```
 
 ```bash
-docker build -t ngaji .
-docker run -d -p 3000:3000 --env-file .env -v $(pwd)/data:/app/data ngaji
+docker build -t tilawah-tracker .
+docker run -d -p 3000:3000 --env-file .env -v $(pwd)/data:/app/data tilawah-tracker
 ```
 
 > Mount the `data/` directory as a volume so the SQLite database persists across container restarts.

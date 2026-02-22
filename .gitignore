@@ -38,3 +38,5 @@ data/*.db-shm
 
 # Finder (MacOS) folder config
 .DS_Store
+
+TILAWAH_PLAN.md

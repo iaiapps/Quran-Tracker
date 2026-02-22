@@ -141,7 +141,7 @@ export const Header: FC<{ user: User | null; currentPath: string }> = ({
                     <form method="post" action="/auth/logout" class="my-0 py-0">
                       <button
                         type="submit"
-                        class="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
                         <span class="material-symbols-outlined text-lg">logout</span>
                         Logout
@@ -241,7 +241,7 @@ export const Header: FC<{ user: User | null; currentPath: string }> = ({
                 <form method="post" action="/auth/logout" class="w-full">
                   <button
                     type="submit"
-                    class="w-full flex items-center justify-center gap-2 text-red-600 bg-white hover:bg-red-50 transition-colors text-sm font-bold px-4 py-3 rounded-xl border border-border-light hover:border-red-100 shadow-sm"
+                    class="w-full flex items-center justify-center gap-2 text-red-600 bg-white hover:bg-red-50 transition-colors text-sm font-bold px-4 py-2 rounded-lg border border-border-light hover:border-red-100 shadow-sm"
                   >
                     <span>Logout</span>
                     <span class="material-symbols-outlined text-xl">logout</span>

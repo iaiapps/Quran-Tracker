@@ -1,19 +1,23 @@
 {
   "name": "ngaji",
-  "module": "src/index.tsx",
+  "version": "1.0.0",
+  "main": "src/index.tsx",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --hot src/index.tsx",
-    "start": "bun run src/index.tsx"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "dev": "tsx watch src/index.tsx",
+    "start": "tsx src/index.tsx"
   },
   "dependencies": {
-    "hono": "^4.11.10"
+    "@hono/node-server": "^1.0.0",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^11.0.0",
+    "dotenv": "^16.0.0",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.0",
+    "tsx": "^4.0.0"
   }
 }

@@ -1,8 +1,10 @@
 export interface User {
   id: number;
-  google_id: string;
-  email: string;
+  username: string;
+  password_hash: string;
   name: string;
+  email: string | null;
+  google_id: string | null;
   avatar_url: string | null;
   role: "pending" | "member" | "admin";
   created_at: string;
@@ -41,14 +43,13 @@ export interface RankedUser {
   avatar_url: string | null;
   rank: number;
   total_memorized: number;
-  juz_completed: number;
+  cycle: number;
+  target: number;
   progress_percent: number;
   current_surah: string;
   current_surah_number: number;
   current_ayah: number;
-  current_juz: number;
   trend: number;
-  streak_days: number;
   joined_label: string;
 }
 

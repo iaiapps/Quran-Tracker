@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { authMiddleware, memberMiddleware } from "../middleware/auth.ts";
-import { getRankedMembers, getUserProgress } from "../lib/progress-calc.ts";
+import { getRankedMembers, getUserProgress } from "../lib/progress-calc.js";
 import { LeaderboardPage } from "../views/pages/LeaderboardPage.tsx";
 import type { Env } from "../types.ts";
 
@@ -11,7 +11,7 @@ leaderboard.use("*", authMiddleware, memberMiddleware);
 leaderboard.get("/", (c) => {
   const user = c.get("user");
   const search = c.req.query("search") || undefined;
-  const sort = c.req.query("sort") || "juz";
+  const sort = c.req.query("sort") || "cycle";
   const page = parseInt(c.req.query("page") || "1", 10);
   const perPage = 20;
 

@@ -15,7 +15,7 @@ export const SearchFilter: FC<{ search?: string; sort?: string }> = ({
           search
         </span>
         <input
-          class="w-full bg-slate-50 text-text-main text-sm placeholder:text-text-secondary/60 rounded-lg border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary pl-10 pr-4 py-2.5 transition-all"
+          class="w-full bg-slate-50 text-text-main text-sm placeholder:text-text-secondary/60 rounded-lg border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none pl-10 pr-4 py-2 transition-all"
           placeholder="Search members by name..."
           type="text"
           name="search"

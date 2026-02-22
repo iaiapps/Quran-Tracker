@@ -92,17 +92,17 @@ const LeaderboardRow: FC<{ member: RankedUser; isCurrentUser: boolean }> = ({
       {/* Current Location */}
       <div class="col-span-6 md:col-span-3">
         <div class="flex items-center gap-2 text-text-secondary md:hidden mb-1 text-xs uppercase font-bold">
-          Location
+          Bacaan
         </div>
-        {member.current_juz > 0 ? (
+        {member.current_surah_number > 0 ? (
           <>
             <p class={`text-text-main text-sm ${isCurrentUser ? "font-semibold" : "font-medium"}`}>
-              Juz {member.current_juz} &bull; Surah {member.current_surah}
+              {member.current_surah}
             </p>
-            <p class="text-text-secondary text-xs">Ayah {member.current_ayah}</p>
+            <p class="text-text-secondary text-xs">Ayat {member.current_ayah}</p>
           </>
         ) : (
-          <p class="text-text-secondary text-sm">Not started yet</p>
+          <p class="text-text-secondary text-sm">Belum mulai</p>
         )}
       </div>
 
@@ -120,7 +120,7 @@ const LeaderboardRow: FC<{ member: RankedUser; isCurrentUser: boolean }> = ({
               style={`width: ${member.progress_percent}%`}
             />
           </div>
-          <span class="text-text-main text-sm font-bold">{member.progress_percent}%</span>
+          <span class="text-text-main text-sm font-bold">{member.cycle.toFixed(1)}x</span>
         </div>
       </div>
 
@@ -156,8 +156,8 @@ export const LeaderboardTable: FC<{
       <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-border-light bg-slate-50/50 text-text-secondary text-xs font-bold uppercase tracking-wider">
         <div class="col-span-1 text-center">Rank</div>
         <div class="col-span-4">Member</div>
-        <div class="col-span-3">Current Location</div>
-        <div class="col-span-3">Progress</div>
+        <div class="col-span-3">Terakhir Baca</div>
+        <div class="col-span-3">Khatam</div>
         <div class="col-span-1 text-right">Trend</div>
       </div>
 
@@ -185,13 +185,13 @@ export const LeaderboardTable: FC<{
           {page > 1 ? (
             <a
               href={`/leaderboard?page=${page - 1}${search ? `&search=${encodeURIComponent(search)}` : ""}${sort ? `&sort=${sort}` : ""}`}
-              class="px-3 py-1.5 rounded-lg border border-border-light bg-white text-text-secondary text-sm hover:text-text-main hover:bg-slate-50 transition-colors font-medium"
+              class="px-3 py-2 rounded-lg border border-border-light bg-white text-text-secondary text-sm hover:text-text-main hover:bg-slate-50 transition-colors font-medium"
             >
               Previous
             </a>
           ) : (
             <button
-              class="px-3 py-1.5 rounded-lg border border-border-light bg-white text-text-secondary text-sm font-medium disabled:opacity-50"
+              class="px-3 py-2 rounded-lg border border-border-light bg-white text-text-secondary text-sm font-medium disabled:opacity-50"
               disabled
             >
               Previous
@@ -200,13 +200,13 @@ export const LeaderboardTable: FC<{
           {page < totalPages ? (
             <a
               href={`/leaderboard?page=${page + 1}${search ? `&search=${encodeURIComponent(search)}` : ""}${sort ? `&sort=${sort}` : ""}`}
-              class="px-3 py-1.5 rounded-lg border border-border-light bg-white text-text-secondary text-sm hover:text-text-main hover:bg-slate-50 transition-colors font-medium"
+              class="px-3 py-2 rounded-lg border border-border-light bg-white text-text-secondary text-sm hover:text-text-main hover:bg-slate-50 transition-colors font-medium"
             >
               Next
             </a>
           ) : (
             <button
-              class="px-3 py-1.5 rounded-lg border border-border-light bg-white text-text-secondary text-sm font-medium disabled:opacity-50"
+              class="px-3 py-2 rounded-lg border border-border-light bg-white text-text-secondary text-sm font-medium disabled:opacity-50"
               disabled
             >
               Next

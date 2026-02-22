@@ -1,9 +1,96 @@
 import { Hono } from "hono";
 import { setCookie, getCookie, deleteCookie } from "hono/cookie";
-import { upsertUser, createSession, deleteSession } from "../lib/session.ts";
-import { GOOGLE_REDIRECT_URI } from "../config.ts";
+import { upsertUser, createSession, deleteSession } from "../lib/session.js";
+import { GOOGLE_REDIRECT_URI } from "../config.js";
+import bcrypt from "bcryptjs";
+import { db } from "../db/connection.js";
 
 const auth = new Hono();
+
+auth.post("/register", async (c) => {
+  const body = await c.req.parseBody();
+  const name = (body.name as string)?.trim();
+  const username = (body.username as string)?.trim().toLowerCase();
+  const password = body.password as string;
+
+  if (!name || !username || !password) {
+    return c.redirect("/login?error=register_failed&message=Name%2C+username+and+password+are+required");
+  }
+
+  if (password.length < 6) {
+    return c.redirect("/login?error=register_failed&message=Password+must+be+at+least+6+characters");
+  }
+
+  const existingUser = db.prepare("SELECT id FROM users WHERE username = ?").get(username);
+  if (existingUser) {
+    return c.redirect("/login?error=register_failed&message=Username+already+taken");
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const count = db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number };
+  const role = count.c === 0 ? "admin" : "member";
+
+  const result = db.prepare(
+    "INSERT INTO users (username, password_hash, name, role) VALUES (?, ?, ?, ?)"
+  ).run(username, passwordHash, name, role);
+
+  const userId = Number(result.lastInsertRowid);
+  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+
+  const sessionId = createSession(user.id);
+
+  setCookie(c, "session", sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+
+  return c.redirect("/leaderboard");
+});
+
+auth.post("/login", async (c) => {
+  const body = await c.req.parseBody();
+  const username = (body.username as string)?.trim().toLowerCase();
+  const password = body.password as string;
+
+  if (!username || !password) {
+    return c.redirect("/login?error=invalid_credentials");
+  }
+
+  const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username) as any;
+
+  if (!user) {
+    return c.redirect("/login?error=invalid_credentials");
+  }
+
+  const validPassword = await bcrypt.compare(password, user.password_hash);
+
+  if (!validPassword) {
+    return c.redirect("/login?error=invalid_credentials");
+  }
+
+  const sessionId = createSession(user.id);
+
+  setCookie(c, "session", sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+
+  if (user.role === "pending") return c.redirect("/pending");
+  return c.redirect("/leaderboard");
+});
+
+/*
+// ============================================
+// GOOGLE OAUTH - Disabled for now
+// Uncomment if you want to enable Google Login
+// ============================================
 
 auth.get("/google", (c) => {
   const state = crypto.randomUUID();
@@ -21,7 +108,6 @@ auth.get("/google", (c) => {
     scope: "openid email profile",
     state,
     access_type: "online",
-    // prompt: "consent",
   });
 
   return c.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
@@ -37,7 +123,6 @@ auth.get("/google/callback", async (c) => {
     return c.redirect("/login?error=invalid_state");
   }
 
-  // Exchange code for tokens
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -56,7 +141,6 @@ auth.get("/google/callback", async (c) => {
 
   const tokens = (await tokenRes.json()) as { access_token: string };
 
-  // Get user info
   const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
@@ -72,7 +156,6 @@ auth.get("/google/callback", async (c) => {
     picture: string;
   };
 
-  // Upsert user in DB
   const user = upsertUser({
     googleId: googleUser.id,
     email: googleUser.email,
@@ -80,7 +163,6 @@ auth.get("/google/callback", async (c) => {
     avatarUrl: googleUser.picture,
   });
 
-  // Create session
   const sessionId = createSession(user.id);
 
   setCookie(c, "session", sessionId, {
@@ -94,6 +176,7 @@ auth.get("/google/callback", async (c) => {
   if (user.role === "pending") return c.redirect("/pending");
   return c.redirect("/leaderboard");
 });
+*/
 
 auth.post("/logout", (c) => {
   const sessionId = getCookie(c, "session");

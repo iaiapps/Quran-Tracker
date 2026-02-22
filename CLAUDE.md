@@ -6,20 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```sh
 # Development (hot reload)
-bun run dev        # bun --hot src/index.tsx
+npm run dev        # tsx watch src/index.tsx
 
 # Production
-bun run start      # bun src/index.tsx
+npm start         # tsx src/index.tsx
 
 # Tests
-bun test
+npm test
 ```
 
-## Bun-specific conventions
+## Node.js-specific conventions
 
-- Use `bun <file>` instead of `node` or `ts-node`
-- Use `bun:sqlite` (not `better-sqlite3`), `Bun.file` (not `fs`), `Bun.serve()` (not `express`)
-- Bun auto-loads `.env` — no dotenv needed
+- Use `node` or `tsx` instead of `bun`
+- Use `better-sqlite3` (not `bun:sqlite`)
+- Use `dotenv` to load environment variables
 
 ## Required environment variables
 
@@ -32,9 +32,9 @@ PORT=3000                        # optional, defaults to 3000
 
 ## Architecture
 
-**Stack:** Bun + Hono (JSX SSR) + SQLite (`bun:sqlite`) + TailwindCSS (CDN, no build step)
+**Stack:** Node.js + Hono (JSX SSR) + SQLite (`better-sqlite3`) + TailwindCSS (CDN, no build step)
 
-**Entry point:** `src/index.tsx` — initializes DB, mounts all routes, exports `{ port, fetch }` for `Bun.serve()`.
+**Entry point:** `src/index.tsx` — initializes DB, mounts all routes, runs on `@hono/node-server`.
 
 **Request lifecycle:**
 1. `src/middleware/auth.ts` — three middleware layers:
@@ -45,12 +45,12 @@ PORT=3000                        # optional, defaults to 3000
 
 **Data flow for progress:**
 - `src/data/quran-meta.ts` — static Quran metadata (114 surahs, juz boundaries)
-- `src/lib/progress-calc.ts` — all progress calculations: `getRankedMembers()`, `getUserProgress()`, juz completion, trend (7-day window from `progress_log`)
+- `src/lib/progress-calc.ts` — all progress calculations: `getRankedMembers()`, `getUserProgress()`, cycle (based on highest position), trend (7-day window from `progress_log`)
 - DB tables: `users`, `sessions`, `progress_entries` (upserted per surah), `progress_log` (append-only history)
 
-**Database:** SQLite at `data/ngaji.db`. WAL mode + foreign keys enabled. Schema initialised in `src/db/schema.ts` via `initializeDatabase()` called on startup. All queries use `bun:sqlite` prepared statements with manual type casts (`.get() as Type | null`).
+**Database:** SQLite at `data/ngaji.db`. WAL mode + foreign keys enabled. Schema initialised in `src/db/schema.ts` via `initializeDatabase()` called on startup. All queries use `better-sqlite3` prepared statements with manual type casts (`.get() as Type | null`).
 
-**Auth:** Google OAuth 2.0. First registered user auto-promoted to `admin`. New users get role `pending` until an admin approves them. Sessions expire after 7 days.
+**Auth:** Username/Password with bcrypt. Google OAuth code is commented out for future use. First registered user auto-promoted to `admin`. New users get role `pending` until an admin approves them. Sessions expire after 7 days.
 
 **Styling:** TailwindCSS loaded from CDN with `?plugins=forms,container-queries`. Custom theme (colors, fonts) is configured inline in `src/views/Layout.tsx` via a `<script>` block — **not** a `tailwind.config.js` file.
 
