@@ -7,6 +7,8 @@ import { db } from "../db/connection.js";
 
 const auth = new Hono();
 type AuthUserRow = { id: number; role: "pending" | "member" | "admin"; password_hash: string };
+const registerErrorRedirect = (message: string) =>
+  `/login?mode=register&error=register_failed&message=${encodeURIComponent(message)}`;
 
 auth.post("/register", async (c) => {
   const body = await c.req.parseBody();
@@ -15,16 +17,16 @@ auth.post("/register", async (c) => {
   const password = body.password as string;
 
   if (!name || !username || !password) {
-    return c.redirect("/login?error=register_failed&message=Name%2C+username+and+password+are+required");
+    return c.redirect(registerErrorRedirect("Name, username and password are required"));
   }
 
   if (password.length < 6) {
-    return c.redirect("/login?error=register_failed&message=Password+must+be+at+least+6+characters");
+    return c.redirect(registerErrorRedirect("Password must be at least 6 characters"));
   }
 
   const existingUser = db.prepare("SELECT id FROM users WHERE username = ?").get(username);
   if (existingUser) {
-    return c.redirect("/login?error=register_failed&message=Username+already+taken");
+    return c.redirect(registerErrorRedirect("Username already taken"));
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -41,7 +43,7 @@ auth.post("/register", async (c) => {
     .prepare("SELECT id, role, password_hash FROM users WHERE id = ?")
     .get(userId) as AuthUserRow | undefined;
   if (!user) {
-    return c.redirect("/login?error=register_failed&message=Failed+to+create+session");
+    return c.redirect(registerErrorRedirect("Failed to create session"));
   }
 
   const sessionId = createSession(user.id);

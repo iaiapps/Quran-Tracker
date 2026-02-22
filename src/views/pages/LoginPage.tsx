@@ -2,11 +2,18 @@ import type { FC } from "hono/jsx";
 import { Layout } from "../Layout.js";
 import { APP_NAME } from "../../config.js";
 
-export const LoginPage: FC<{ error?: string }> = ({ error }) => {
-  const isRegister = error?.includes("register_failed");
-  const message = error?.includes("message=") 
-    ? decodeURIComponent(error.split("message=")[1] || "") 
-    : "";
+export const LoginPage: FC<{ error?: string; mode?: string; message?: string }> = ({
+  error,
+  mode,
+  message,
+}) => {
+  const isRegister = mode === "register" || error === "register_failed";
+  const showError = Boolean(error);
+  const displayMessage = message
+    ? decodeURIComponent(message.replace(/\+/g, " "))
+    : isRegister
+      ? "Registration failed"
+      : "Invalid username or password";
 
   return (
     <Layout title={isRegister ? `Register - ${APP_NAME}` : `Sign In - ${APP_NAME}`}>
@@ -30,9 +37,9 @@ export const LoginPage: FC<{ error?: string }> = ({ error }) => {
               </p>
             </div>
 
-            {error && (
+            {showError && (
               <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-6 border border-red-200">
-                {message || (isRegister ? "Registration failed" : "Invalid username or password")}
+                {displayMessage}
               </div>
             )}
 
@@ -118,7 +125,7 @@ export const LoginPage: FC<{ error?: string }> = ({ error }) => {
               ) : (
                 <p class="text-text-secondary text-sm">
                   Don't have an account?{" "}
-                  <a href="/login?error=register_failed" class="text-primary font-medium hover:underline">
+                  <a href="/login?mode=register" class="text-primary font-medium hover:underline">
                     Register
                   </a>
                 </p>

@@ -53,7 +53,9 @@ app.get("/login", (c) => {
     if (user && user.role !== "pending") return c.redirect("/leaderboard");
   }
   const error = c.req.query("error");
-  return c.html(<LoginPage error={error} />);
+  const mode = c.req.query("mode");
+  const message = c.req.query("message");
+  return c.html(<LoginPage error={error} mode={mode} message={message} />);
 });
 
 app.get("/pending", authMiddleware, (c) => {
