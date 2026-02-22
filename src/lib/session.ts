@@ -1,5 +1,5 @@
-import { db } from "../db/connection.ts";
-import type { User } from "../types.ts";
+import { db } from "../db/connection.js";
+import type { User } from "../types.js";
 
 export function createSession(userId: number): string {
   const id = crypto.randomUUID();

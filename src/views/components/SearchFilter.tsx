@@ -6,7 +6,7 @@ export const SearchFilter: FC<{ search?: string; sort?: string }> = ({
 }) => {
   return (
     <form
-      method="GET"
+      method="get"
       action="/leaderboard"
       class="w-full flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 bg-white border border-border-light p-3 rounded-xl shadow-sm"
     >

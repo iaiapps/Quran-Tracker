@@ -1,5 +1,5 @@
 import type { FC } from "hono/jsx";
-import type { RankedUser } from "../../types.ts";
+import type { RankedUser } from "../../types.js";
 
 const TrendBadge: FC<{ trend: number }> = ({ trend }) => {
   if (trend > 0) {

@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import { getCookie } from "hono/cookie";
-import { getSessionUser } from "../lib/session.ts";
-import type { Env } from "../types.ts";
+import { getSessionUser } from "../lib/session.js";
+import type { Env } from "../types.js";
 
 export const authMiddleware = createMiddleware<Env>(async (c, next) => {
   const sessionId = getCookie(c, "session");

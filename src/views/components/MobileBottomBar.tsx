@@ -1,8 +1,10 @@
 import type { FC } from "hono/jsx";
-import type { RankedUser } from "../../types.ts";
+import type { RankedUser } from "../../types.js";
+import { getJuzForPosition } from "../../data/quran-meta.js";
 
 export const MobileBottomBar: FC<{ userRank: RankedUser | null }> = ({ userRank }) => {
   if (!userRank) return null;
+  const currentJuz = getJuzForPosition(userRank.current_surah_number, userRank.current_ayah);
 
   return (
     <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-border-light p-4 md:hidden shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-40">
@@ -14,7 +16,7 @@ export const MobileBottomBar: FC<{ userRank: RankedUser | null }> = ({ userRank 
           <div>
             <p class="text-text-main text-sm font-bold">You</p>
             <p class="text-text-secondary text-xs">
-              Juz {userRank.current_juz} &bull; {userRank.progress_percent}%
+              Juz {currentJuz} &bull; {userRank.progress_percent}%
             </p>
           </div>
         </div>

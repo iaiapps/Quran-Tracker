@@ -52,13 +52,12 @@ PORT=3000
 # Development (hot reload)
 npm run dev
 
-# Production
+# Production (build once, then run)
+npm run build
 npm start
 ```
 
 The app will be available at `http://localhost:3000`.
-
-> **No build step required.** Node.js executes TypeScript via tsx, and TailwindCSS is loaded from CDN.
 
 ## Deploying to Production
 
@@ -78,6 +77,9 @@ NODE_ENV=production
 ```bash
 npm install -g pm2
 
+# Build first
+npm run build
+
 # Start using the ecosystem config
 pm2 start ecosystem.config.cjs
 
@@ -90,9 +92,26 @@ Common PM2 commands:
 
 ```bash
 pm2 status          # Check running processes
-pm2 logs ngaji      # Tail logs
-pm2 restart ngaji   # Restart
-pm2 stop ngaji      # Stop
+pm2 logs tilawah-tracker      # Tail logs
+pm2 restart tilawah-tracker   # Restart
+pm2 stop tilawah-tracker      # Stop
+```
+
+### Shared hosting (Node.js app manager)
+
+`npm start` now runs `node dist/index.js` (no `tsx` in production runtime), which is safer for memory-limited hosting.
+
+Recommended flow:
+
+```bash
+# 1) install dependencies
+npm install
+
+# 2) build TypeScript -> JavaScript
+npm run build
+
+# 3) start app
+npm start
 ```
 
 ### Nginx (reverse proxy)
@@ -116,6 +135,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+RUN npm run build
 EXPOSE 3000
 CMD ["npm", "start"]
 ```

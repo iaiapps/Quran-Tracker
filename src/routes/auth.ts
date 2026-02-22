@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { db } from "../db/connection.js";
 
 const auth = new Hono();
+type AuthUserRow = { id: number; role: "pending" | "member" | "admin"; password_hash: string };
 
 auth.post("/register", async (c) => {
   const body = await c.req.parseBody();
@@ -29,14 +30,19 @@ auth.post("/register", async (c) => {
   const passwordHash = await bcrypt.hash(password, 10);
 
   const count = db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number };
-  const role = count.c === 0 ? "admin" : "member";
+  const role = count.c === 0 ? "admin" : "pending";
 
   const result = db.prepare(
     "INSERT INTO users (username, password_hash, name, role) VALUES (?, ?, ?, ?)"
   ).run(username, passwordHash, name, role);
 
   const userId = Number(result.lastInsertRowid);
-  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+  const user = db
+    .prepare("SELECT id, role, password_hash FROM users WHERE id = ?")
+    .get(userId) as AuthUserRow | undefined;
+  if (!user) {
+    return c.redirect("/login?error=register_failed&message=Failed+to+create+session");
+  }
 
   const sessionId = createSession(user.id);
 
@@ -60,7 +66,9 @@ auth.post("/login", async (c) => {
     return c.redirect("/login?error=invalid_credentials");
   }
 
-  const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username) as any;
+  const user = db
+    .prepare("SELECT id, role, password_hash FROM users WHERE username = ?")
+    .get(username) as AuthUserRow | undefined;
 
   if (!user) {
     return c.redirect("/login?error=invalid_credentials");

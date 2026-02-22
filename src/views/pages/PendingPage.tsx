@@ -1,7 +1,7 @@
 import type { FC } from "hono/jsx";
-import { Layout } from "../Layout.tsx";
-import type { User } from "../../types.ts";
-import { APP_NAME } from "../../config.ts";
+import { Layout } from "../Layout.js";
+import type { User } from "../../types.js";
+import { APP_NAME } from "../../config.js";
 
 export const PendingPage: FC<{ user: User }> = ({ user }) => {
   return (
@@ -32,7 +32,7 @@ export const PendingPage: FC<{ user: User }> = ({ user }) => {
                 </span>
               </div>
             </div>
-            <form method="POST" action="/auth/logout" class="mt-6">
+            <form method="post" action="/auth/logout" class="mt-6">
               <button
                 type="submit"
                 class="text-text-secondary hover:text-red-500 transition-colors text-sm font-medium"

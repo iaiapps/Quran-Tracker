@@ -2,9 +2,7 @@ module.exports = {
     apps: [
         {
             name: "tilawah-tracker",
-            script: "npx",
-            args: "tsx src/index.tsx",
-            interpreter: "none",
+            script: "dist/index.js",
             watch: false,
             env: {
                 NODE_ENV: "production",

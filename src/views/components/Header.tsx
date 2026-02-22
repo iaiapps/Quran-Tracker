@@ -1,6 +1,6 @@
 import type { FC } from "hono/jsx";
-import type { User } from "../../types.ts";
-import { APP_NAME } from "../../config.ts";
+import type { User } from "../../types.js";
+import { APP_NAME } from "../../config.js";
 
 const Logo: FC = () => (
   <svg class="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">

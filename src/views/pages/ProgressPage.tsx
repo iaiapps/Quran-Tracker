@@ -76,7 +76,7 @@ export const ProgressPage: FC<{
             <span class="material-symbols-outlined text-primary">edit_note</span>
             Input Bacaan
           </h2>
-          <form method="POST" action="/progress" class="flex flex-col sm:flex-row gap-4">
+          <form method="post" action="/progress" class="flex flex-col sm:flex-row gap-4">
             <div class="flex-1">
               <label class="block text-text-secondary text-xs font-bold mb-1 uppercase tracking-wider">
                 Surah

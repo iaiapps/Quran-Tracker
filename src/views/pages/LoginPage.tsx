@@ -37,7 +37,7 @@ export const LoginPage: FC<{ error?: string }> = ({ error }) => {
             )}
 
             {isRegister ? (
-              <form method="POST" action="/auth/register" class="space-y-4">
+              <form method="post" action="/auth/register" class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-text-main mb-1">Name</label>
                   <input
@@ -77,7 +77,7 @@ export const LoginPage: FC<{ error?: string }> = ({ error }) => {
                 </button>
               </form>
             ) : (
-              <form method="POST" action="/auth/login" class="space-y-4">
+              <form method="post" action="/auth/login" class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-text-main mb-1">Username</label>
                   <input

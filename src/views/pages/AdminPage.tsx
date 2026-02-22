@@ -49,7 +49,7 @@ export const AdminPage: FC<{
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <form method="POST" action="/admin/settings/target" class="flex flex-col gap-2">
+              <form method="post" action="/admin/settings/target" class="flex flex-col gap-2">
                 <label class="text-text-secondary text-sm font-medium">Target Khatam</label>
                 <div class="flex gap-2">
                   <select 
@@ -72,7 +72,7 @@ export const AdminPage: FC<{
             </div>
 
             <div>
-              <form method="POST" action="/admin/settings/year" class="flex flex-col gap-2">
+              <form method="post" action="/admin/settings/year" class="flex flex-col gap-2">
                 <label class="text-text-secondary text-sm font-medium">Tahun Ramadan</label>
                 <div class="flex gap-2">
                   <select 
@@ -105,7 +105,7 @@ export const AdminPage: FC<{
           <p class="text-text-secondary text-sm mb-4">
             Reset semua progress user. Progress akan diarsipkan ke history sebelum dihapus.
           </p>
-          <form method="POST" action="/admin/reset/all" class="flex flex-col gap-3">
+          <form method="post" action="/admin/reset/all" class="flex flex-col gap-3">
             <div>
               <label class="text-text-secondary text-sm font-medium">Ketik RESET untuk konfirmasi </label>
               <input 
@@ -146,12 +146,12 @@ export const AdminPage: FC<{
                     </div>
                   </div>
                   <div class="flex items-center gap-2">
-                    <form method="POST" action={`/admin/users/${u.id}/approve`}>
+                    <form method="post" action={`/admin/users/${u.id}/approve`}>
                       <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors">
                         Approve
                       </button>
                     </form>
-                    <form method="POST" action={`/admin/users/${u.id}/reject`}>
+                    <form method="post" action={`/admin/users/${u.id}/reject`}>
                       <button type="submit" class="px-4 py-2 bg-white text-red-500 border border-red-200 rounded-lg font-bold text-sm hover:bg-red-50 transition-colors">
                         Tolak
                       </button>
@@ -195,7 +195,7 @@ export const AdminPage: FC<{
                     {u.role}
                   </span>
                   {u.role === "member" && u.id !== user.id && (
-                    <form method="POST" action={`/admin/users/${u.id}/role`}>
+                    <form method="post" action={`/admin/users/${u.id}/role`}>
                       <input type="hidden" name="role" value="admin" />
                       <button type="submit" class="text-text-secondary hover:text-primary text-xs font-medium transition-colors">
                         Jadikan Admin
@@ -203,7 +203,7 @@ export const AdminPage: FC<{
                     </form>
                   )}
                   {u.role !== "admin" && u.id !== user.id && (
-                    <form method="POST" action={`/admin/users/${u.id}/delete`} onsubmit={`return confirm("Hapus ${u.name}?")`}>
+                    <form method="post" action={`/admin/users/${u.id}/delete`} onsubmit={`return confirm("Hapus ${u.name}?")`}>
                       <button type="submit" class="text-text-secondary hover:text-red-500 text-xs font-medium transition-colors">
                         Hapus
                       </button>

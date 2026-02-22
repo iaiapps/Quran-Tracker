@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { authMiddleware, memberMiddleware } from "../middleware/auth.ts";
+import { authMiddleware, memberMiddleware } from "../middleware/auth.js";
 import { getRankedMembers, getUserProgress } from "../lib/progress-calc.js";
-import { LeaderboardPage } from "../views/pages/LeaderboardPage.tsx";
-import type { Env } from "../types.ts";
+import { LeaderboardPage } from "../views/pages/LeaderboardPage.js";
+import type { Env } from "../types.js";
 
 const leaderboard = new Hono<Env>();
 

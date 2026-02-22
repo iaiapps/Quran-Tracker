@@ -1,5 +1,5 @@
 import type { FC, Child } from "hono/jsx";
-import { APP_NAME } from "../config.ts";
+import { APP_NAME } from "../config.js";
 
 export const Layout: FC<{ title?: string; children: Child }> = ({ title, children }) => {
   return (
@@ -51,20 +51,10 @@ export const Layout: FC<{ title?: string; children: Child }> = ({ title, childre
         `,
           }}
         />
-        <style
-          type="text/tailwindcss"
-          dangerouslySetInnerHTML={{
-            __html: `
-          @layer base {
-            body {
-              @apply bg-background text-text-main font-display;
-            }
-          }
-        `,
-          }}
-        />
       </head>
-      <body class="min-h-screen flex flex-col">{children}</body>
+      <body class="min-h-screen flex flex-col bg-background text-text-main font-display">
+        {children}
+      </body>
     </html>
   );
 };
