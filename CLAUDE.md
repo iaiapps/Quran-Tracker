@@ -9,7 +9,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev        # tsx watch src/index.tsx
 
 # Production
-npm start         # tsx src/index.tsx
+npm start         # node dist/index.js
+
+# Build
+npm run build     # TypeScript to CommonJS
+npm run typecheck # TypeScript type checking
 
 # Tests
 npm test
@@ -17,9 +21,18 @@ npm test
 
 ## Node.js-specific conventions
 
-- Use `node` or `tsx` instead of `bun`
-- Use `better-sqlite3` (not `bun:sqlite`)
+- Use `node` or `tsx` (not bun)
+- Use `sql.js` - SQLite in WebAssembly, compatible with shared hosting
 - Use `dotenv` to load environment variables
+- **Output: CommonJS** - compatible with shared hosting (cPanel, Plesk, dll)
+
+## Shared Hosting Notes
+
+This app is designed for Node.js shared hosting:
+- CommonJS output (no ESM)
+- Uses `sql.js` instead of `better-sqlite3` (no native bindings)
+- No WebSocket or long-running processes
+- Database stored in `data/ngaji.db` (file-based SQLite)
 
 ## Required environment variables
 
@@ -32,7 +45,7 @@ PORT=3000                        # optional, defaults to 3000
 
 ## Architecture
 
-**Stack:** Node.js + Hono (JSX SSR) + SQLite (`better-sqlite3`) + TailwindCSS (CDN, no build step)
+**Stack:** Node.js + Hono (JSX SSR) + SQLite (`sql.js`) + TailwindCSS (CDN, no build step)
 
 **Entry point:** `src/index.tsx` — initializes DB, mounts all routes, runs on `@hono/node-server`.
 
@@ -48,7 +61,7 @@ PORT=3000                        # optional, defaults to 3000
 - `src/lib/progress-calc.ts` — all progress calculations: `getRankedMembers()`, `getUserProgress()`, cycle (based on highest position), trend (7-day window from `progress_log`)
 - DB tables: `users`, `sessions`, `progress_entries` (upserted per surah), `progress_log` (append-only history)
 
-**Database:** SQLite at `data/ngaji.db`. WAL mode + foreign keys enabled. Schema initialised in `src/db/schema.ts` via `initializeDatabase()` called on startup. All queries use `better-sqlite3` prepared statements with manual type casts (`.get() as Type | null`).
+**Database:** SQLite at `data/ngaji.db`. Schema initialised in `src/db/schema.ts` via `initializeDatabase()` called on startup. Uses `sql.js` wrapper in `src/db/connection.ts` that emulates better-sqlite3 API. All queries use prepared statements with manual type casts (`.get() as Type | null`).
 
 **Auth:** Username/Password with bcrypt. Google OAuth code is commented out for future use. First registered user auto-promoted to `admin`. New users get role `pending` until an admin approves them. Sessions expire after 7 days.
 

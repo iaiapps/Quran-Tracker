@@ -15,11 +15,18 @@ A Quran reading (tilawah) progress tracking app for communities during Ramadan. 
 
 | Layer | Technology |
 |---|---|
-| Runtime | [Node.js](https://nodejs.org) |
+| Runtime | [Node.js](https://nodejs.org) v20+ |
 | Framework | [Hono](https://hono.dev) (JSX SSR) |
-| Database | SQLite via `better-sqlite3` |
+| Database | SQLite via `sql.js` (WebAssembly) |
 | Styling | TailwindCSS (CDN) |
 | Auth | Username/Password (bcrypt) |
+
+## Shared Hosting Compatible
+
+This app is designed to work on Node.js shared hosting (cPanel, Plesk, dll):
+- **CommonJS output** - no ESM support needed
+- **sql.js** - SQLite in WebAssembly, no native bindings required
+- **File-based database** - stored in `data/ngaji.db`
 
 ## Getting Started
 
