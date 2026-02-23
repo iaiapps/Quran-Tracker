@@ -1,7 +1,16 @@
-import { db } from "../db/connection.js";
-import { TOTAL_AYAHS, getSurah, } from "../data/quran-meta.js";
-import { getTargetKhatam } from "./settings.js";
-export function getHighestPosition(entries) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getHighestPosition = getHighestPosition;
+exports.calculateTotalAyahFromPosition = calculateTotalAyahFromPosition;
+exports.currentCycle = currentCycle;
+exports.cycleProgressPercent = cycleProgressPercent;
+exports.getRemainingCycles = getRemainingCycles;
+exports.getRankedMembers = getRankedMembers;
+exports.getUserProgress = getUserProgress;
+const connection_js_1 = require("../db/connection.js");
+const quran_meta_js_1 = require("../data/quran-meta.js");
+const settings_js_1 = require("./settings.js");
+function getHighestPosition(entries) {
     if (entries.length === 0) {
         return { surahNumber: 0, ayah: 0 };
     }
@@ -16,12 +25,12 @@ export function getHighestPosition(entries) {
     }
     return { surahNumber: highest.surah_number, ayah: highest.last_ayah };
 }
-export function calculateTotalAyahFromPosition(surahNumber, ayah) {
+function calculateTotalAyahFromPosition(surahNumber, ayah) {
     if (surahNumber === 0)
         return 0;
     let total = 0;
     for (let i = 1; i < surahNumber; i++) {
-        const surah = getSurah(i);
+        const surah = (0, quran_meta_js_1.getSurah)(i);
         if (surah) {
             total += surah.totalAyahs;
         }
@@ -29,13 +38,13 @@ export function calculateTotalAyahFromPosition(surahNumber, ayah) {
     total += ayah;
     return total;
 }
-export function currentCycle(totalAyahs) {
-    return totalAyahs / TOTAL_AYAHS;
+function currentCycle(totalAyahs) {
+    return totalAyahs / quran_meta_js_1.TOTAL_AYAHS;
 }
-export function cycleProgressPercent(currentCycleVal, target = 1) {
+function cycleProgressPercent(currentCycleVal, target = 1) {
     return Math.min(100, Math.round((currentCycleVal / target) * 100));
 }
-export function getRemainingCycles(currentCycleVal, target = 1) {
+function getRemainingCycles(currentCycleVal, target = 1) {
     return Math.max(0, target - currentCycleVal);
 }
 function getJoinedLabel(createdAt) {
@@ -54,14 +63,14 @@ function getJoinedLabel(createdAt) {
     return `Joined ${Math.floor(diffDays / 30)} months ago`;
 }
 function calculateTrend(userId) {
-    const result = db
+    const result = connection_js_1.db
         .prepare(`SELECT COALESCE(SUM(ayah_to - ayah_from), 0) as delta
        FROM progress_log
        WHERE user_id = ? AND logged_at >= datetime('now', '-7 days')`)
         .get(userId);
     return result.delta;
 }
-export function getRankedMembers(params) {
+function getRankedMembers(params) {
     const { search, sort = "cycle", page = 1, perPage = 20 } = params;
     // Get all approved members
     let whereClause = "WHERE u.role IN ('member', 'admin')";
@@ -71,12 +80,12 @@ export function getRankedMembers(params) {
         queryParams.push(`%${search}%`);
     }
     // Count total
-    const countRow = db
+    const countRow = connection_js_1.db
         .prepare(`SELECT COUNT(*) as c FROM users u ${whereClause}`)
         .get(...queryParams);
     const total = countRow.c;
     // Get users with their progress (we'll calculate total based on highest position)
-    const users = db
+    const users = connection_js_1.db
         .prepare(`SELECT u.id, u.name, u.avatar_url, u.created_at
        FROM users u
        ${whereClause}
@@ -86,7 +95,7 @@ export function getRankedMembers(params) {
     // Build ranked users with full details
     const members = [];
     // For ranking, we need to calculate based on highest position
-    const allUserEntries = db
+    const allUserEntries = connection_js_1.db
         .prepare(`
       SELECT u.id, pe.surah_number, pe.last_ayah
       FROM users u
@@ -109,15 +118,15 @@ export function getRankedMembers(params) {
     const rankMap = new Map();
     sortedUsers.forEach(([userId], i) => rankMap.set(userId, i + 1));
     for (const u of users) {
-        const entries = db
+        const entries = connection_js_1.db
             .prepare("SELECT * FROM progress_entries WHERE user_id = ?")
             .all(u.id);
         const position = getHighestPosition(entries);
         const totalAyah = calculateTotalAyahFromPosition(position.surahNumber, position.ayah);
         const trend = calculateTrend(u.id);
         const cycle = currentCycle(totalAyah);
-        const target = getTargetKhatam();
-        const surah = getSurah(position.surahNumber);
+        const target = (0, settings_js_1.getTargetKhatam)();
+        const surah = (0, quran_meta_js_1.getSurah)(position.surahNumber);
         members.push({
             id: u.id,
             name: u.name,
@@ -143,15 +152,15 @@ export function getRankedMembers(params) {
     }
     return { members, total };
 }
-export function getUserProgress(userId) {
-    const entries = db
+function getUserProgress(userId) {
+    const entries = connection_js_1.db
         .prepare("SELECT * FROM progress_entries WHERE user_id = ? ORDER BY surah_number ASC, last_ayah DESC")
         .all(userId);
     const position = getHighestPosition(entries);
     const total = calculateTotalAyahFromPosition(position.surahNumber, position.ayah);
     const cycleVal = currentCycle(total);
-    const target = getTargetKhatam();
-    const surah = getSurah(position.surahNumber);
+    const target = (0, settings_js_1.getTargetKhatam)();
+    const surah = (0, quran_meta_js_1.getSurah)(position.surahNumber);
     return {
         entries,
         totalMemorized: total,

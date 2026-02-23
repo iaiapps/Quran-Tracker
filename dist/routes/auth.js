@@ -1,10 +1,16 @@
-import { Hono } from "hono";
-import { setCookie, getCookie, deleteCookie } from "hono/cookie";
-import { upsertUser, createSession, deleteSession } from "../lib/session.js";
-import { GOOGLE_REDIRECT_URI } from "../config.js";
-import bcrypt from "bcryptjs";
-import { db } from "../db/connection.js";
-const auth = new Hono();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authRoutes = void 0;
+const hono_1 = require("hono");
+const cookie_1 = require("hono/cookie");
+const session_js_1 = require("../lib/session.js");
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const connection_js_1 = require("../db/connection.js");
+const auth = new hono_1.Hono();
+exports.authRoutes = auth;
 const registerErrorRedirect = (message) => `/login?mode=register&error=register_failed&message=${encodeURIComponent(message)}`;
 auth.post("/register", async (c) => {
     const body = await c.req.parseBody();
@@ -17,23 +23,23 @@ auth.post("/register", async (c) => {
     if (password.length < 6) {
         return c.redirect(registerErrorRedirect("Password must be at least 6 characters"));
     }
-    const existingUser = db.prepare("SELECT id FROM users WHERE username = ?").get(username);
+    const existingUser = connection_js_1.db.prepare("SELECT id FROM users WHERE username = ?").get(username);
     if (existingUser) {
         return c.redirect(registerErrorRedirect("Username already taken"));
     }
-    const passwordHash = await bcrypt.hash(password, 10);
-    const count = db.prepare("SELECT COUNT(*) as c FROM users").get();
+    const passwordHash = await bcryptjs_1.default.hash(password, 10);
+    const count = connection_js_1.db.prepare("SELECT COUNT(*) as c FROM users").get();
     const role = count.c === 0 ? "admin" : "pending";
-    const result = db.prepare("INSERT INTO users (username, password_hash, name, role) VALUES (?, ?, ?, ?)").run(username, passwordHash, name, role);
+    const result = connection_js_1.db.prepare("INSERT INTO users (username, password_hash, name, role) VALUES (?, ?, ?, ?)").run(username, passwordHash, name, role);
     const userId = Number(result.lastInsertRowid);
-    const user = db
+    const user = connection_js_1.db
         .prepare("SELECT id, role, password_hash FROM users WHERE id = ?")
         .get(userId);
     if (!user) {
         return c.redirect(registerErrorRedirect("Failed to create session"));
     }
-    const sessionId = createSession(user.id);
-    setCookie(c, "session", sessionId, {
+    const sessionId = (0, session_js_1.createSession)(user.id);
+    (0, cookie_1.setCookie)(c, "session", sessionId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "Lax",
@@ -49,18 +55,18 @@ auth.post("/login", async (c) => {
     if (!username || !password) {
         return c.redirect("/login?error=invalid_credentials");
     }
-    const user = db
+    const user = connection_js_1.db
         .prepare("SELECT id, role, password_hash FROM users WHERE username = ?")
         .get(username);
     if (!user) {
         return c.redirect("/login?error=invalid_credentials");
     }
-    const validPassword = await bcrypt.compare(password, user.password_hash);
+    const validPassword = await bcryptjs_1.default.compare(password, user.password_hash);
     if (!validPassword) {
         return c.redirect("/login?error=invalid_credentials");
     }
-    const sessionId = createSession(user.id);
-    setCookie(c, "session", sessionId, {
+    const sessionId = (0, session_js_1.createSession)(user.id);
+    (0, cookie_1.setCookie)(c, "session", sessionId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "Lax",
@@ -163,10 +169,9 @@ auth.get("/google/callback", async (c) => {
 });
 */
 auth.post("/logout", (c) => {
-    const sessionId = getCookie(c, "session");
+    const sessionId = (0, cookie_1.getCookie)(c, "session");
     if (sessionId)
-        deleteSession(sessionId);
-    deleteCookie(c, "session", { path: "/" });
+        (0, session_js_1.deleteSession)(sessionId);
+    (0, cookie_1.deleteCookie)(c, "session", { path: "/" });
     return c.redirect("/login");
 });
-export { auth as authRoutes };

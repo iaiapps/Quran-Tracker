@@ -1,12 +1,8 @@
 import initSqlJs, { type Database as SqlJsDatabase } from "sql.js";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { join } from "path";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const dataDir = join(__dirname, "../../data");
+const dataDir = join(process.cwd(), "data");
 const dbPath = join(dataDir, "ngaji.db");
 
 if (!existsSync(dataDir)) {

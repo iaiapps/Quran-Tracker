@@ -16,26 +16,26 @@ import { Layout } from "./views/Layout.js";
 import { authMiddleware } from "./middleware/auth.js";
 import { APP_NAME } from "./config.js";
 
-console.log(`[${new Date().toISOString()}] Starting ${APP_NAME}...`);
-console.log("NODE_ENV:", process.env.NODE_ENV);
+async function start() {
+  console.log(`[${new Date().toISOString()}] Starting ${APP_NAME}...`);
 
-try {
-  await initDb();
-  initializeDatabase();
-  console.log("[OK] Database initialized");
-} catch (err) {
-  console.error("[ERROR] Failed to initialize database:", err);
-  process.exit(1);
-}
+  try {
+    await initDb();
+    initializeDatabase();
+    console.log("[OK] Database initialized");
+  } catch (err) {
+    console.error("[ERROR] Failed to initialize database:", err);
+    process.exit(1);
+  }
 
-try {
-  cleanExpiredSessions();
-  console.log("[OK] Expired sessions cleaned");
-} catch (err) {
-  console.error("[WARNING] Failed to clean sessions:", err);
-}
+  try {
+    cleanExpiredSessions();
+    console.log("[OK] Expired sessions cleaned");
+  } catch (err) {
+    console.error("[WARNING] Failed to clean sessions:", err);
+  }
 
-const app = new Hono();
+  const app = new Hono();
 
 app.get("/", (c) => {
   const sessionId = getCookie(c, "session");
@@ -92,12 +92,12 @@ app.notFound((c) => {
 
 const port = parseInt(process.env.PORT || process.env.NODE_PORT || "3000", 10);
 
-console.log("PORT env:", process.env.PORT);
-console.log("Listening on port:", port);
-
 serve({
   fetch: app.fetch,
   port,
 });
 
 console.log(`${APP_NAME} running at http://localhost:${port}`);
+}
+
+start();

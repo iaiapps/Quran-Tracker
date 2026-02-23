@@ -2,13 +2,12 @@
   "compilerOptions": {
     "lib": ["ESNext"],
     "target": "ESNext",
-    "module": "Preserve",
+    "module": "CommonJS",
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "allowJs": true,
-    "moduleResolution": "bundler",
-    "verbatimModuleSyntax": true,
+    "moduleResolution": "node",
     "noEmit": true,
     "strict": true,
     "skipLibCheck": true,
@@ -18,6 +17,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
+    "esModuleInterop": true,
     "types": ["node"]
   },
   "include": ["src/**/*"]

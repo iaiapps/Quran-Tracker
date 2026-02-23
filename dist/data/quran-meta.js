@@ -1,4 +1,9 @@
-export const SURAHS = [
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.JUZ_BOUNDARIES = exports.TOTAL_AYAHS = exports.SURAHS = void 0;
+exports.getSurah = getSurah;
+exports.getJuzForPosition = getJuzForPosition;
+exports.SURAHS = [
     { number: 1, name: "Al-Fatihah", nameArabic: "الفاتحة", totalAyahs: 7 },
     { number: 2, name: "Al-Baqarah", nameArabic: "البقرة", totalAyahs: 286 },
     { number: 3, name: "Ali 'Imran", nameArabic: "آل عمران", totalAyahs: 200 },
@@ -115,9 +120,9 @@ export const SURAHS = [
     { number: 114, name: "An-Nas", nameArabic: "الناس", totalAyahs: 6 },
 ];
 // Total ayahs in the entire Quran
-export const TOTAL_AYAHS = SURAHS.reduce((sum, s) => sum + s.totalAyahs, 0); // 6236
+exports.TOTAL_AYAHS = exports.SURAHS.reduce((sum, s) => sum + s.totalAyahs, 0); // 6236
 // Juz boundaries (standard Uthmani mushaf)
-export const JUZ_BOUNDARIES = [
+exports.JUZ_BOUNDARIES = [
     { juzNumber: 1, startSurah: 1, startAyah: 1, endSurah: 2, endAyah: 141 },
     { juzNumber: 2, startSurah: 2, startAyah: 142, endSurah: 2, endAyah: 252 },
     { juzNumber: 3, startSurah: 2, startAyah: 253, endSurah: 3, endAyah: 92 },
@@ -150,12 +155,12 @@ export const JUZ_BOUNDARIES = [
     { juzNumber: 30, startSurah: 78, startAyah: 1, endSurah: 114, endAyah: 6 },
 ];
 // Helper: get surah by number
-export function getSurah(number) {
-    return SURAHS[number - 1];
+function getSurah(number) {
+    return exports.SURAHS[number - 1];
 }
 // Helper: get which Juz a given surah:ayah position is in
-export function getJuzForPosition(surahNumber, ayahNumber) {
-    for (const juz of JUZ_BOUNDARIES) {
+function getJuzForPosition(surahNumber, ayahNumber) {
+    for (const juz of exports.JUZ_BOUNDARIES) {
         const afterStart = surahNumber > juz.startSurah ||
             (surahNumber === juz.startSurah && ayahNumber >= juz.startAyah);
         const beforeEnd = surahNumber < juz.endSurah ||

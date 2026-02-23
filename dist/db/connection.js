@@ -1,13 +1,17 @@
-import initSqlJs, {} from "sql.js";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const dataDir = join(__dirname, "../../data");
-const dbPath = join(dataDir, "ngaji.db");
-if (!existsSync(dataDir)) {
-    mkdirSync(dataDir, { recursive: true });
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.db = void 0;
+exports.initDb = initDb;
+const sql_js_1 = __importDefault(require("sql.js"));
+const fs_1 = require("fs");
+const path_1 = require("path");
+const dataDir = (0, path_1.join)(process.cwd(), "data");
+const dbPath = (0, path_1.join)(dataDir, "ngaji.db");
+if (!(0, fs_1.existsSync)(dataDir)) {
+    (0, fs_1.mkdirSync)(dataDir, { recursive: true });
 }
 class Statement {
     stmt;
@@ -59,9 +63,9 @@ class Database {
         this.dbPath = dbPath;
     }
     async init() {
-        const SQL = await initSqlJs();
-        if (existsSync(this.dbPath)) {
-            const buffer = readFileSync(this.dbPath);
+        const SQL = await (0, sql_js_1.default)();
+        if ((0, fs_1.existsSync)(this.dbPath)) {
+            const buffer = (0, fs_1.readFileSync)(this.dbPath);
             this.db = new SQL.Database(buffer);
         }
         else {
@@ -95,7 +99,7 @@ class Database {
         if (this.dirty) {
             const data = this.db.export();
             const buffer = Buffer.from(data);
-            writeFileSync(this.dbPath, buffer);
+            (0, fs_1.writeFileSync)(this.dbPath, buffer);
             this.dirty = false;
         }
     }
@@ -110,7 +114,7 @@ class Database {
         }
     }
 }
-export const db = new Database(dbPath);
-export async function initDb() {
-    await db.init();
+exports.db = new Database(dbPath);
+async function initDb() {
+    await exports.db.init();
 }

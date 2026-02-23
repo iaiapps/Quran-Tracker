@@ -1,6 +1,9 @@
-import { db } from "./connection.js";
-export function initializeDatabase() {
-    db.exec(`
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.initializeDatabase = initializeDatabase;
+const connection_js_1 = require("./connection.js");
+function initializeDatabase() {
+    connection_js_1.db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
       username      TEXT NOT NULL UNIQUE,
@@ -65,17 +68,17 @@ export function initializeDatabase() {
     );
   `);
     // Insert default settings if not exists
-    const existingTarget = db.prepare("SELECT value FROM settings WHERE key = 'target_khatam'").get();
+    const existingTarget = connection_js_1.db.prepare("SELECT value FROM settings WHERE key = 'target_khatam'").get();
     if (!existingTarget) {
-        db.prepare("INSERT INTO settings (key, value) VALUES ('target_khatam', '1')").run();
+        connection_js_1.db.prepare("INSERT INTO settings (key, value) VALUES ('target_khatam', '1')").run();
     }
-    const existingYear = db.prepare("SELECT value FROM settings WHERE key = 'ramadan_year'").get();
+    const existingYear = connection_js_1.db.prepare("SELECT value FROM settings WHERE key = 'ramadan_year'").get();
     if (!existingYear) {
         // Calculate approximate Hijri year: Gregorian year - 622 + (difference / 33)
         // More accurate: use known conversion
         // 2025 = 1446, 2026 = 1447
         const gregorian = new Date().getFullYear();
         const hijri = gregorian - 622 + Math.floor((gregorian - 622) / 33);
-        db.prepare("INSERT INTO settings (key, value) VALUES ('ramadan_year', ?)").run(hijri.toString());
+        connection_js_1.db.prepare("INSERT INTO settings (key, value) VALUES ('ramadan_year', ?)").run(hijri.toString());
     }
 }
