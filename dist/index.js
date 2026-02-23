@@ -17,6 +17,7 @@ import { Layout } from "./views/Layout.js";
 import { authMiddleware } from "./middleware/auth.js";
 import { APP_NAME } from "./config.js";
 console.log(`[${new Date().toISOString()}] Starting ${APP_NAME}...`);
+console.log("NODE_ENV:", process.env.NODE_ENV);
 try {
     await initDb();
     initializeDatabase();
@@ -73,6 +74,8 @@ app.notFound((c) => {
     return c.html(_jsx(Layout, { title: `Not Found - ${APP_NAME}`, children: _jsx("div", { class: "flex-1 flex items-center justify-center", children: _jsxs("div", { class: "text-center", children: [_jsx("h1", { class: "text-6xl font-black text-text-secondary mb-4", children: "404" }), _jsx("p", { class: "text-text-secondary mb-6", children: "Page not found" }), _jsx("a", { href: "/", class: "text-primary font-bold hover:underline", children: "Go Home" })] }) }) }), 404);
 });
 const port = parseInt(process.env.PORT || process.env.NODE_PORT || "3000", 10);
+console.log("PORT env:", process.env.PORT);
+console.log("Listening on port:", port);
 serve({
     fetch: app.fetch,
     port,

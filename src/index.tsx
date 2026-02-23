@@ -17,6 +17,7 @@ import { authMiddleware } from "./middleware/auth.js";
 import { APP_NAME } from "./config.js";
 
 console.log(`[${new Date().toISOString()}] Starting ${APP_NAME}...`);
+console.log("NODE_ENV:", process.env.NODE_ENV);
 
 try {
   await initDb();
@@ -90,6 +91,9 @@ app.notFound((c) => {
 });
 
 const port = parseInt(process.env.PORT || process.env.NODE_PORT || "3000", 10);
+
+console.log("PORT env:", process.env.PORT);
+console.log("Listening on port:", port);
 
 serve({
   fetch: app.fetch,
