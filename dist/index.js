@@ -13,6 +13,7 @@ const leaderboard_js_1 = require("./routes/leaderboard.js");
 const progress_js_1 = require("./routes/progress.js");
 const admin_js_1 = require("./routes/admin.js");
 const dashboard_js_1 = require("./routes/dashboard.js");
+const profile_js_1 = require("./routes/profile.js");
 const LoginPage_js_1 = require("./views/pages/LoginPage.js");
 const PendingPage_js_1 = require("./views/pages/PendingPage.js");
 const Layout_js_1 = require("./views/Layout.js");
@@ -72,6 +73,7 @@ async function start() {
     app.route("/progress", progress_js_1.progressRoutes);
     app.route("/admin", admin_js_1.adminRoutes);
     app.route("/dashboard", dashboard_js_1.dashboardRoutes);
+    app.route("/profile", profile_js_1.profileRoutes);
     app.notFound((c) => {
         return c.html((0, jsx_runtime_1.jsx)(Layout_js_1.Layout, { title: `Not Found - ${config_js_1.APP_NAME}`, children: (0, jsx_runtime_1.jsx)("div", { class: "flex-1 flex items-center justify-center", children: (0, jsx_runtime_1.jsxs)("div", { class: "text-center", children: [(0, jsx_runtime_1.jsx)("h1", { class: "text-6xl font-black text-text-secondary mb-4", children: "404" }), (0, jsx_runtime_1.jsx)("p", { class: "text-text-secondary mb-6", children: "Page not found" }), (0, jsx_runtime_1.jsx)("a", { href: "/", class: "text-primary font-bold hover:underline", children: "Go Home" })] }) }) }), 404);
     });

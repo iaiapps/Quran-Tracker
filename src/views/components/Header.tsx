@@ -138,6 +138,13 @@ export const Header: FC<{ user: User | null; currentPath: string }> = ({
                       <p class="text-sm font-semibold text-text-main truncate">{user.name}</p>
                       <p class="text-xs text-text-secondary">Signed in</p>
                     </div>
+                    <a
+                      href="/profile"
+                      class="flex items-center gap-2 px-4 py-2 text-sm text-text-main hover:bg-slate-50 transition-colors"
+                    >
+                      <span class="material-symbols-outlined text-lg">edit</span>
+                      Edit Profile
+                    </a>
                     <form method="post" action="/auth/logout" class="my-0 py-0">
                       <button
                         type="submit"
@@ -238,6 +245,13 @@ export const Header: FC<{ user: User | null; currentPath: string }> = ({
                     <p class="text-text-secondary text-xs">Signed in</p>
                   </div>
                 </div>
+                <a
+                  href="/profile"
+                  class="w-full flex items-center justify-center gap-2 text-text-main bg-white hover:bg-slate-50 transition-colors text-sm font-bold px-4 py-2 rounded-lg border border-border-light hover:border-primary/50 shadow-sm"
+                >
+                  <span>Edit Profile</span>
+                  <span class="material-symbols-outlined text-xl">edit</span>
+                </a>
                 <form method="post" action="/auth/logout" class="w-full">
                   <button
                     type="submit"

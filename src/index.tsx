@@ -10,6 +10,7 @@ import { leaderboardRoutes } from "./routes/leaderboard.js";
 import { progressRoutes } from "./routes/progress.js";
 import { adminRoutes } from "./routes/admin.js";
 import { dashboardRoutes } from "./routes/dashboard.js";
+import { profileRoutes } from "./routes/profile.js";
 import { LoginPage } from "./views/pages/LoginPage.js";
 import { PendingPage } from "./views/pages/PendingPage.js";
 import { Layout } from "./views/Layout.js";
@@ -72,6 +73,7 @@ app.route("/leaderboard", leaderboardRoutes);
 app.route("/progress", progressRoutes);
 app.route("/admin", adminRoutes);
 app.route("/dashboard", dashboardRoutes);
+app.route("/profile", profileRoutes);
 
 app.notFound((c) => {
   return c.html(

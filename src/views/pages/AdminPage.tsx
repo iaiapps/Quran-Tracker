@@ -135,24 +135,24 @@ export const AdminPage: FC<{
             </div>
             <div class="divide-y divide-border-light">
               {pendingUsers.map((u) => (
-                <div class="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
-                  <div class="flex items-center gap-3">
-                    <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-text-secondary text-xs font-bold border border-slate-200">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 px-6 py-4 hover:bg-slate-50 transition-colors">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-text-secondary text-xs font-bold border border-slate-200 flex-shrink-0">
                       {u.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                     </div>
-                    <div>
-                      <p class="text-text-main text-sm font-bold">{u.name}</p>
-                      <p class="text-text-secondary text-xs">{u.username}</p>
+                    <div class="min-w-0">
+                      <p class="text-text-main text-sm font-bold truncate">{u.name}</p>
+                      <p class="text-text-secondary text-xs truncate">@{u.username}</p>
                     </div>
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-start md:items-center gap-2 flex-wrap">
                     <form method="post" action={`/admin/users/${u.id}/approve`}>
-                      <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors">
+                      <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors whitespace-nowrap">
                         Approve
                       </button>
                     </form>
                     <form method="post" action={`/admin/users/${u.id}/reject`}>
-                      <button type="submit" class="px-4 py-2 bg-white text-red-500 border border-red-200 rounded-lg font-bold text-sm hover:bg-red-50 transition-colors">
+                      <button type="submit" class="px-4 py-2 bg-white text-red-500 border border-red-200 rounded-lg font-bold text-sm hover:bg-red-50 transition-colors whitespace-nowrap">
                         Tolak
                       </button>
                     </form>
@@ -173,38 +173,38 @@ export const AdminPage: FC<{
           </div>
           <div class="divide-y divide-border-light">
             {allUsers.map((u) => (
-              <div class="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
-                <div class="flex items-center gap-3">
-                  <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-text-secondary text-xs font-bold border border-slate-200">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 px-6 py-4 hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-text-secondary text-xs font-bold border border-slate-200 flex-shrink-0">
                     {u.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
                   </div>
-                  <div>
-                    <p class="text-text-main text-sm font-bold flex items-center gap-2">
+                  <div class="min-w-0">
+                    <p class="text-text-main text-sm font-bold flex items-center gap-2 truncate">
                       {u.name}
                       {u.id === user.id && (
-                        <span class="text-[10px] bg-primary text-white px-1.5 py-0.5 rounded uppercase tracking-wider font-black">
+                        <span class="text-[10px] bg-primary text-white px-1.5 py-0.5 rounded uppercase tracking-wider font-black flex-shrink-0">
                           Anda
                         </span>
                       )}
                     </p>
-                    <p class="text-text-secondary text-xs">@{u.username}</p>
+                    <p class="text-text-secondary text-xs truncate">@{u.username}</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class={`text-xs font-bold px-2 py-1 rounded ${u.role === "admin" ? "bg-purple-50 text-purple-600 border border-purple-200" : "bg-emerald-50 text-emerald-600 border border-emerald-200"}`}>
+                <div class="flex items-start md:items-center gap-2 flex-wrap">
+                  <span class={`text-xs font-bold px-3 py-1.5 rounded-lg ${u.role === "admin" ? "bg-purple-50 text-purple-600 border border-purple-200" : "bg-emerald-50 text-emerald-600 border border-emerald-200"}`}>
                     {u.role}
                   </span>
                   {u.role === "member" && u.id !== user.id && (
                     <form method="post" action={`/admin/users/${u.id}/role`}>
                       <input type="hidden" name="role" value="admin" />
-                      <button type="submit" class="px-3 py-1.5 mt-2 bg-purple-50 text-purple-600 border border-purple-200 rounded-lg font-bold text-xs hover:bg-purple-100 transition-colors">
+                      <button type="submit" class="px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-lg font-bold text-xs hover:bg-purple-100 transition-colors whitespace-nowrap">
                         Jadikan Admin
                       </button>
                     </form>
                   )}
                   {u.role !== "admin" && u.id !== user.id && (
                     <form method="post" action={`/admin/users/${u.id}/delete`} onsubmit={`return confirm("Hapus ${u.name}?")`}>
-                      <button type="submit" class="px-3 py-1.5 mt-2 bg-white text-red-500 border border-red-200 rounded-lg font-bold text-xs hover:bg-red-50 transition-colors">
+                      <button type="submit" class="px-3 py-1.5 bg-white text-red-500 border border-red-200 rounded-lg font-bold text-xs hover:bg-red-50 transition-colors whitespace-nowrap">
                         Hapus
                       </button>
                     </form>

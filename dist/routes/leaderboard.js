@@ -15,8 +15,8 @@ leaderboard.get("/", (c) => {
     const sort = c.req.query("sort") || "cycle";
     const page = parseInt(c.req.query("page") || "1", 10);
     const perPage = 20;
-    // Get top 3 for the podium cards
-    const { members: allTop } = (0, progress_calc_js_1.getRankedMembers)({ sort: "juz", perPage: 3 });
+    // Get top 3 for the podium cards (sorted by cycle/total pages read)
+    const { members: allTop } = (0, progress_calc_js_1.getRankedMembers)({ perPage: 3 });
     // Get paginated members (skip top 3 on page 1)
     const { members, total } = (0, progress_calc_js_1.getRankedMembers)({ search, sort, page, perPage });
     // Get current user's rank info

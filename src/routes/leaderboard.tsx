@@ -15,8 +15,8 @@ leaderboard.get("/", (c) => {
   const page = parseInt(c.req.query("page") || "1", 10);
   const perPage = 20;
 
-  // Get top 3 for the podium cards
-  const { members: allTop } = getRankedMembers({ sort: "juz", perPage: 3 });
+  // Get top 3 for the podium cards (sorted by cycle/total pages read)
+  const { members: allTop } = getRankedMembers({ perPage: 3 });
 
   // Get paginated members (skip top 3 on page 1)
   const { members, total } = getRankedMembers({ search, sort, page, perPage });

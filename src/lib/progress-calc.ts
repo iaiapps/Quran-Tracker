@@ -29,21 +29,12 @@ export function getHighestPage(entries: ProgressEntry[]): number {
   return highest.last_page;
 }
 
-export function calculateTotalPagesFromPosition(page: number): number {
-  if (page === 0) return 0;
-  return page;
-}
-
 export function currentCycle(totalPages: number): number {
   return totalPages / TOTAL_PAGES;
 }
 
 export function cycleProgressPercent(currentCycleVal: number, target: number = 1): number {
   return Math.min(100, Math.round((currentCycleVal / target) * 100));
-}
-
-export function getRemainingCycles(currentCycleVal: number, target: number = 1): number {
-  return Math.max(0, target - currentCycleVal);
 }
 
 function getJoinedLabel(createdAt: string): string {
@@ -71,6 +62,18 @@ function calculateTrend(userId: number): number {
   return result.delta;
 }
 
+function getTotalPagesRead(userId: number): number {
+  const result = db
+    .prepare(
+      `SELECT COALESCE(SUM(page_to - page_from), 0) as total
+       FROM progress_log
+       WHERE user_id = ?`
+    )
+    .get(userId) as { total: number };
+
+  return result.total;
+}
+
 export function getRankedMembers(params: {
   search?: string;
   sort?: string;
@@ -92,54 +95,72 @@ export function getRankedMembers(params: {
     .get(...queryParams) as { c: number };
   const total = countRow.c;
 
-  const users = db
+  // First get all users with their total pages read, then sort and paginate
+  const allUsers = db
     .prepare(
       `SELECT u.id, u.name, u.avatar_url, u.created_at
        FROM users u
-       ${whereClause}
-       ORDER BY u.created_at ASC
-       LIMIT ? OFFSET ?`
+       ${whereClause}`
     )
-    .all(...queryParams, perPage, (page - 1) * perPage) as Array<{
+    .all(...queryParams) as Array<{
     id: number;
     name: string;
     avatar_url: string | null;
     created_at: string;
   }>;
 
-  const members: RankedUser[] = [];
-
-  const allUserEntries = db
+  // Get all totals from progress_log
+  const allUserTotalRead = db
     .prepare(`
-      SELECT u.id, pe.last_page
-      FROM users u
-      LEFT JOIN progress_entries pe ON pe.user_id = u.id
-      WHERE u.role IN ('member', 'admin')
+      SELECT user_id as id, COALESCE(SUM(page_to - page_from), 0) as total
+      FROM progress_log
+      GROUP BY user_id
     `)
-    .all() as Array<{ id: number; last_page: number | null }>;
+    .all() as Array<{ id: number; total: number }>;
 
-  const userTotals = new Map<number, number>();
-  for (const row of allUserEntries) {
-    if (row.last_page) {
-      const current = userTotals.get(row.id) || 0;
-      if (row.last_page > current) {
-        userTotals.set(row.id, row.last_page);
+  const totalReadMap = new Map<number, number>();
+  for (const row of allUserTotalRead) {
+    totalReadMap.set(row.id, row.total);
+  }
+
+  // Also check progress_entries for users without log
+  for (const u of allUsers) {
+    if (!totalReadMap.has(u.id)) {
+      const entry = db.prepare("SELECT last_page FROM progress_entries WHERE user_id = ?").get(u.id) as { last_page: number } | undefined;
+      if (entry) {
+        totalReadMap.set(u.id, entry.last_page);
       }
     }
   }
 
-  const sortedUsers = [...userTotals.entries()].sort((a, b) => b[1] - a[1]);
-  const rankMap = new Map<number, number>();
-  sortedUsers.forEach(([userId], i) => rankMap.set(userId, i + 1));
+  // Sort all users by total pages read
+  allUsers.sort((a, b) => {
+    const totalA = totalReadMap.get(a.id) || 0;
+    const totalB = totalReadMap.get(b.id) || 0;
+    if (sort === "name") {
+      return a.name.localeCompare(b.name);
+    }
+    return totalB - totalA;
+  });
 
-  for (const u of users) {
+  // Create rank map
+  const rankMap = new Map<number, number>();
+  allUsers.forEach((u, i) => rankMap.set(u.id, i + 1));
+
+  // Paginate
+  const paginatedUsers = allUsers.slice((page - 1) * perPage, page * perPage);
+
+  const members: RankedUser[] = [];
+
+  for (const u of paginatedUsers) {
     const entries = db
       .prepare("SELECT * FROM progress_entries WHERE user_id = ?")
       .all(u.id) as ProgressEntry[];
 
     const highestPage = getHighestPage(entries);
+    const totalForCycle = totalReadMap.get(u.id) || 0;
     const trend = calculateTrend(u.id);
-    const cycle = currentCycle(highestPage);
+    const cycle = currentCycle(totalForCycle > 0 ? totalForCycle : highestPage);
     const target = getTargetKhatam();
 
     const pos = getPositionForPage(highestPage);
@@ -164,12 +185,6 @@ export function getRankedMembers(params: {
     });
   }
 
-  if (sort === "name") {
-    members.sort((a, b) => a.name.localeCompare(b.name));
-  } else {
-    members.sort((a, b) => b.cycle - a.cycle);
-  }
-
   return { members, total };
 }
 
@@ -188,7 +203,9 @@ export function getUserProgress(userId: number): {
     .all(userId) as ProgressEntry[];
 
   const highestPage = getHighestPage(entries);
-  const cycleVal = currentCycle(highestPage);
+  const totalPagesRead = getTotalPagesRead(userId);
+  const totalForCycle = totalPagesRead > 0 ? totalPagesRead : highestPage;
+  const cycleVal = currentCycle(totalForCycle);
   const target = getTargetKhatam();
 
   const pos = getPositionForPage(highestPage);
