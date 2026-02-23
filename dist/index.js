@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
+import { db, initDb } from "./db/connection.js";
 import { initializeDatabase } from "./db/schema.js";
 import { getSessionUser, cleanExpiredSessions } from "./lib/session.js";
 import { authRoutes } from "./routes/auth.js";
@@ -17,6 +18,7 @@ import { authMiddleware } from "./middleware/auth.js";
 import { APP_NAME } from "./config.js";
 console.log(`[${new Date().toISOString()}] Starting ${APP_NAME}...`);
 try {
+    await initDb();
     initializeDatabase();
     console.log("[OK] Database initialized");
 }
