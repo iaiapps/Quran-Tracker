@@ -76,9 +76,17 @@ async function start() {
         return c.html((0, jsx_runtime_1.jsx)(Layout_js_1.Layout, { title: `Not Found - ${config_js_1.APP_NAME}`, children: (0, jsx_runtime_1.jsx)("div", { class: "flex-1 flex items-center justify-center", children: (0, jsx_runtime_1.jsxs)("div", { class: "text-center", children: [(0, jsx_runtime_1.jsx)("h1", { class: "text-6xl font-black text-text-secondary mb-4", children: "404" }), (0, jsx_runtime_1.jsx)("p", { class: "text-text-secondary mb-6", children: "Page not found" }), (0, jsx_runtime_1.jsx)("a", { href: "/", class: "text-primary font-bold hover:underline", children: "Go Home" })] }) }) }), 404);
     });
     const port = parseInt(process.env.PORT || process.env.NODE_PORT || "3000", 10);
-    (0, node_server_1.serve)({
+    const server = (0, node_server_1.serve)({
         fetch: app.fetch,
         port,
+    });
+    process.on("SIGINT", () => {
+        console.log("\nShutting down gracefully...");
+        connection_js_1.db.close();
+        server.close(() => {
+            console.log("Server closed");
+            process.exit(0);
+        });
     });
     console.log(`${config_js_1.APP_NAME} running at http://localhost:${port}`);
 }

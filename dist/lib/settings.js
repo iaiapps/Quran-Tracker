@@ -6,19 +6,8 @@ exports.getTargetKhatam = getTargetKhatam;
 exports.getRamadanYear = getRamadanYear;
 exports.archiveAndResetAllUsers = archiveAndResetAllUsers;
 const connection_js_1 = require("../db/connection.js");
+const progress_calc_js_1 = require("./progress-calc.js");
 const quran_meta_js_1 = require("../data/quran-meta.js");
-function calculateTotalAyah(surahNumber, ayah) {
-    if (surahNumber === 0)
-        return 0;
-    let total = 0;
-    for (let i = 1; i < surahNumber; i++) {
-        const surah = (0, quran_meta_js_1.getSurah)(i);
-        if (surah)
-            total += surah.totalAyahs;
-    }
-    total += ayah;
-    return total;
-}
 function getSetting(key) {
     const row = connection_js_1.db.prepare("SELECT value FROM settings WHERE key = ?").get(key);
     return row?.value || null;
@@ -38,19 +27,11 @@ function archiveAndResetAllUsers() {
     const year = getRamadanYear();
     const users = connection_js_1.db.prepare("SELECT id FROM users WHERE role IN ('member', 'admin')").all();
     for (const user of users) {
-        const entries = connection_js_1.db.prepare("SELECT surah_number, last_ayah FROM progress_entries WHERE user_id = ?").all(user.id);
-        // Find highest position
-        let highest = { surah_number: 0, last_ayah: 0 };
-        for (const e of entries) {
-            if (e.surah_number > highest.surah_number ||
-                (e.surah_number === highest.surah_number && e.last_ayah > highest.last_ayah)) {
-                highest = e;
-            }
-        }
-        const totalAyah = calculateTotalAyah(highest.surah_number, highest.last_ayah);
-        const totalCycles = totalAyah / 6236;
-        if (totalAyah > 0) {
-            connection_js_1.db.prepare("INSERT INTO history (user_id, year, total_ayat, total_cycles) VALUES (?, ?, ?, ?)").run(user.id, year, totalAyah, totalCycles);
+        const entries = connection_js_1.db.prepare("SELECT * FROM progress_entries WHERE user_id = ?").all(user.id);
+        const highestPage = (0, progress_calc_js_1.getHighestPage)(entries);
+        const totalCycles = highestPage / quran_meta_js_1.TOTAL_PAGES;
+        if (highestPage > 0) {
+            connection_js_1.db.prepare("INSERT INTO history (user_id, year, total_pages, total_cycles) VALUES (?, ?, ?, ?)").run(user.id, year, highestPage, totalCycles);
         }
         connection_js_1.db.prepare("DELETE FROM progress_entries WHERE user_id = ?").run(user.id);
         connection_js_1.db.prepare("DELETE FROM progress_log WHERE user_id = ?").run(user.id);

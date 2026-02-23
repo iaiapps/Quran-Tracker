@@ -92,9 +92,18 @@ app.notFound((c) => {
 
 const port = parseInt(process.env.PORT || process.env.NODE_PORT || "3000", 10);
 
-serve({
+const server = serve({
   fetch: app.fetch,
   port,
+});
+
+process.on("SIGINT", () => {
+  console.log("\nShutting down gracefully...");
+  db.close();
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
 });
 
 console.log(`${APP_NAME} running at http://localhost:${port}`);

@@ -94,12 +94,12 @@ const LeaderboardRow: FC<{ member: RankedUser; isCurrentUser: boolean }> = ({
         <div class="flex items-center gap-2 text-text-secondary md:hidden mb-1 text-xs uppercase font-bold">
           Bacaan
         </div>
-        {member.current_surah_number > 0 ? (
+        {member.total_memorized > 0 ? (
           <>
             <p class={`text-text-main text-sm ${isCurrentUser ? "font-semibold" : "font-medium"}`}>
-              {member.current_surah}
+              Halaman {member.total_memorized}
             </p>
-            <p class="text-text-secondary text-xs">Ayat {member.current_ayah}</p>
+            <p class="text-text-secondary text-xs">Juz {member.current_juz || 1}</p>
           </>
         ) : (
           <p class="text-text-secondary text-sm">Belum mulai</p>

@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx";
 import { Layout } from "../Layout.js";
 import { Header } from "../components/Header.js";
 import type { User, RankedUser } from "../../types.js";
+import { TOTAL_PAGES } from "../../data/quran-meta.js";
 import { APP_NAME } from "../../config.js";
 
 export const DashboardPage: FC<{
@@ -11,7 +12,7 @@ export const DashboardPage: FC<{
   progressPercent: number;
   totalMemorized: number;
   rank: RankedUser | null;
-  currentPosition: { surahNumber: number; ayah: number; surahName: string };
+  currentPosition: { page: number; surahNumber: number; ayah: number; surahName: string; juz: number };
   ramadanYear: number;
 }> = ({ user, cycle, target, progressPercent, totalMemorized, rank, currentPosition, ramadanYear }) => {
   return (
@@ -52,12 +53,12 @@ export const DashboardPage: FC<{
             <p class="text-3xl font-black text-text-main">{target}x</p>
           </div>
           <div class="bg-white border border-border-light rounded-xl p-5 text-center">
-            <p class="text-text-secondary text-xs font-medium mb-1">Ayat</p>
-            <p class="text-3xl font-black text-text-main">{totalMemorized.toLocaleString()}</p>
+            <p class="text-text-secondary text-xs font-medium mb-1">Halaman</p>
+            <p class="text-2xl font-black text-text-main mt-2">{totalMemorized}/{TOTAL_PAGES}</p>
           </div>
         </div>
 
-        {currentPosition.surahNumber > 0 && (
+        {currentPosition.page > 0 && (
           <div class="w-full bg-white border-2 border-primary/20 rounded-xl p-6 mb-8 shadow-sm">
             <div class="flex items-center gap-3 mb-3">
               <span class="material-symbols-outlined text-primary text-2xl">menu_book</span>
@@ -65,12 +66,16 @@ export const DashboardPage: FC<{
             </div>
             <div class="flex flex-wrap gap-6 text-sm">
               <div>
+                <span class="text-text-secondary">Halaman</span>
+                <p class="text-text-main font-bold text-lg">{currentPosition.page}</p>
+              </div>
+              <div>
                 <span class="text-text-secondary">Surah</span>
                 <p class="text-text-main font-bold text-lg">{currentPosition.surahName}</p>
               </div>
               <div>
-                <span class="text-text-secondary">Ayat</span>
-                <p class="text-text-main font-bold text-lg">{currentPosition.ayah}</p>
+                <span class="text-text-secondary">Juz</span>
+                <p class="text-text-main font-bold text-lg">{currentPosition.juz}</p>
               </div>
             </div>
           </div>
@@ -95,7 +100,7 @@ export const DashboardPage: FC<{
           </div>
           <div class="flex justify-between text-sm text-text-secondary">
             <span>{progressPercent}% complete</span>
-            <span>{totalMemorized.toLocaleString()} / 6,236 ayat</span>
+            <span>{totalMemorized} / {TOTAL_PAGES} halaman</span>
           </div>
         </div>
 

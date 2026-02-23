@@ -190,21 +190,21 @@ export const AdminPage: FC<{
                     <p class="text-text-secondary text-xs">@{u.username}</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                   <span class={`text-xs font-bold px-2 py-1 rounded ${u.role === "admin" ? "bg-purple-50 text-purple-600 border border-purple-200" : "bg-emerald-50 text-emerald-600 border border-emerald-200"}`}>
                     {u.role}
                   </span>
                   {u.role === "member" && u.id !== user.id && (
                     <form method="post" action={`/admin/users/${u.id}/role`}>
                       <input type="hidden" name="role" value="admin" />
-                      <button type="submit" class="text-text-secondary hover:text-primary text-xs font-medium transition-colors">
+                      <button type="submit" class="px-3 py-1.5 mt-2 bg-purple-50 text-purple-600 border border-purple-200 rounded-lg font-bold text-xs hover:bg-purple-100 transition-colors">
                         Jadikan Admin
                       </button>
                     </form>
                   )}
                   {u.role !== "admin" && u.id !== user.id && (
                     <form method="post" action={`/admin/users/${u.id}/delete`} onsubmit={`return confirm("Hapus ${u.name}?")`}>
-                      <button type="submit" class="text-text-secondary hover:text-red-500 text-xs font-medium transition-colors">
+                      <button type="submit" class="px-3 py-1.5 mt-2 bg-white text-red-500 border border-red-200 rounded-lg font-bold text-xs hover:bg-red-50 transition-colors">
                         Hapus
                       </button>
                     </form>

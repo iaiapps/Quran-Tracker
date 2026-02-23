@@ -30,12 +30,11 @@ function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS progress_entries (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      surah_number INTEGER NOT NULL,
-      last_ayah    INTEGER NOT NULL,
+      last_page    INTEGER NOT NULL,
       completed    INTEGER NOT NULL DEFAULT 0,
       created_at   TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, surah_number)
+      UNIQUE(user_id)
     );
 
     CREATE INDEX IF NOT EXISTS idx_progress_user ON progress_entries(user_id);
@@ -43,9 +42,8 @@ function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS progress_log (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      surah_number INTEGER NOT NULL,
-      ayah_from    INTEGER NOT NULL,
-      ayah_to      INTEGER NOT NULL,
+      page_from    INTEGER NOT NULL,
+      page_to      INTEGER NOT NULL,
       logged_at    TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -62,7 +60,7 @@ function initializeDatabase() {
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       year         INTEGER NOT NULL,
-      total_ayat   INTEGER NOT NULL,
+      total_pages  INTEGER NOT NULL,
       total_cycles FLOAT NOT NULL,
       completed_at TEXT NOT NULL DEFAULT (datetime('now'))
     );

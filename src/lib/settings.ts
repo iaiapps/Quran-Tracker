@@ -1,16 +1,7 @@
 import { db } from "../db/connection.js";
-import { getSurah } from "../data/quran-meta.js";
-
-function calculateTotalAyah(surahNumber: number, ayah: number): number {
-  if (surahNumber === 0) return 0;
-  let total = 0;
-  for (let i = 1; i < surahNumber; i++) {
-    const surah = getSurah(i);
-    if (surah) total += surah.totalAyahs;
-  }
-  total += ayah;
-  return total;
-}
+import { getHighestPage } from "./progress-calc.js";
+import { TOTAL_PAGES } from "../data/quran-meta.js";
+import type { ProgressEntry } from "../types.js";
 
 export function getSetting(key: string): string | null {
   const row = db.prepare("SELECT value FROM settings WHERE key = ?").get(key) as { value: string } | null;
@@ -38,24 +29,15 @@ export function archiveAndResetAllUsers(): void {
   const users = db.prepare("SELECT id FROM users WHERE role IN ('member', 'admin')").all() as { id: number }[];
 
   for (const user of users) {
-    const entries = db.prepare("SELECT surah_number, last_ayah FROM progress_entries WHERE user_id = ?").all(user.id) as { surah_number: number; last_ayah: number }[];
+    const entries = db.prepare("SELECT * FROM progress_entries WHERE user_id = ?").all(user.id) as ProgressEntry[];
     
-    // Find highest position
-    let highest = { surah_number: 0, last_ayah: 0 };
-    for (const e of entries) {
-      if (e.surah_number > highest.surah_number || 
-          (e.surah_number === highest.surah_number && e.last_ayah > highest.last_ayah)) {
-        highest = e;
-      }
-    }
-    
-    const totalAyah = calculateTotalAyah(highest.surah_number, highest.last_ayah);
-    const totalCycles = totalAyah / 6236;
+    const highestPage = getHighestPage(entries);
+    const totalCycles = highestPage / TOTAL_PAGES;
 
-    if (totalAyah > 0) {
+    if (highestPage > 0) {
       db.prepare(
-        "INSERT INTO history (user_id, year, total_ayat, total_cycles) VALUES (?, ?, ?, ?)"
-      ).run(user.id, year, totalAyah, totalCycles);
+        "INSERT INTO history (user_id, year, total_pages, total_cycles) VALUES (?, ?, ?, ?)"
+      ).run(user.id, year, highestPage, totalCycles);
     }
 
     db.prepare("DELETE FROM progress_entries WHERE user_id = ?").run(user.id);

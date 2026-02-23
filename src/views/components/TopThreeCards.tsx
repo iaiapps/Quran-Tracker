@@ -46,7 +46,7 @@ const SecondPlace: FC<{ member: RankedUser }> = ({ member }) => (
         <span>{member.progress_percent}%</span>
         {member.trend > 0 && (
           <span class="flex items-center gap-1 text-primary">
-            <span class="material-symbols-outlined text-sm">trending_up</span> +{member.trend} Ayat
+            <span class="material-symbols-outlined text-sm">trending_up</span> +{member.trend} halaman
           </span>
         )}
       </div>
@@ -100,7 +100,7 @@ const FirstPlace: FC<{ member: RankedUser }> = ({ member }) => (
           <span class="text-green-600">Khatam!</span>
         ) : (
           member.trend > 0 && (
-            <span class="text-text-secondary">+{member.trend} Ayat minggu ini</span>
+            <span class="text-text-secondary">+{member.trend} halaman minggu ini</span>
           )
         )}
       </div>
@@ -140,7 +140,7 @@ const ThirdPlace: FC<{ member: RankedUser }> = ({ member }) => (
         <span>{member.progress_percent}%</span>
         {member.trend > 0 && (
           <span class="flex items-center gap-1 text-primary">
-            <span class="material-symbols-outlined text-sm">trending_up</span> +{member.trend} Ayat
+            <span class="material-symbols-outlined text-sm">trending_up</span> +{member.trend} halaman
           </span>
         )}
       </div>

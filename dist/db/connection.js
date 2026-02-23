@@ -51,7 +51,7 @@ class Statement {
             changes: this.dbWrapper.getDb().getRowsModified(),
             lastInsertRowid: this.dbWrapper.getDb().exec("SELECT last_insert_rowid()")[0]?.values[0]?.[0] || 0
         };
-        this.dbWrapper.markDirty();
+        this.dbWrapper.save(true); // Force save
         return result;
     }
 }
@@ -93,10 +93,10 @@ class Database {
     markDirty() {
         this.dirty = true;
     }
-    save() {
+    save(force = false) {
         if (!this.db)
             throw new Error("Database not initialized");
-        if (this.dirty) {
+        if (force || this.dirty) {
             const data = this.db.export();
             const buffer = Buffer.from(data);
             (0, fs_1.writeFileSync)(this.dbPath, buffer);

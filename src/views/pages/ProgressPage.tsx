@@ -1,23 +1,28 @@
 import type { FC } from "hono/jsx";
 import { Layout } from "../Layout.js";
 import { Header } from "../components/Header.js";
-import type { User, ProgressEntry } from "../../types.js";
-import { SURAHS, getSurah } from "../../data/quran-meta.js";
+import type { User } from "../../types.js";
+import { TOTAL_PAGES, getPositionForPage, getSurah, getJuzForPosition } from "../../data/quran-meta.js";
 import { APP_NAME } from "../../config.js";
+
+interface ProgressHistoryItem {
+  id: number;
+  pageFrom: number;
+  pageTo: number;
+  loggedAt: string;
+}
 
 export const ProgressPage: FC<{
   user: User;
-  entries: ProgressEntry[];
+  history: ProgressHistoryItem[];
   cycle: number;
   target: number;
   progressPercent: number;
-  currentPosition: { surahNumber: number; ayah: number; surahName: string };
+  currentPosition: { page: number; surahNumber: number; ayah: number; surahName: string; juz: number };
   ramadanYear: number;
   success?: string;
   error?: string;
-}> = ({ user, entries, cycle, target, progressPercent, currentPosition, ramadanYear, success, error }) => {
-  const sortedEntries = [...entries].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-  const entryMap = new Map(entries.map((entry) => [entry.surah_number, entry] as const));
+}> = ({ user, history, cycle, target, progressPercent, currentPosition, ramadanYear, success, error }) => {
 
   return (
     <Layout title={`Update Progress - ${APP_NAME}`}>
@@ -46,14 +51,12 @@ export const ProgressPage: FC<{
             <p class="text-2xl font-black text-text-main">{target}x</p>
           </div>
           <div class="bg-white border border-border-light rounded-xl p-5 text-center">
-            <p class="text-text-secondary text-xs font-medium mb-1">Surah</p>
-            <p class="text-2xl font-black text-text-main">{entries.length}/114</p>
+            <p class="text-text-secondary text-xs font-medium mb-1">Halaman</p>
+            <p class="text-2xl font-black text-text-main">{currentPosition.page}/{TOTAL_PAGES}</p>
           </div>
           <div class="bg-white border border-border-light rounded-xl p-5 text-center">
-            <p class="text-text-secondary text-xs font-medium mb-1">Ayat</p>
-            <p class="text-2xl font-black text-text-main">
-              {entries.reduce((sum, e) => sum + e.last_ayah, 0).toLocaleString()}
-            </p>
+            <p class="text-text-secondary text-xs font-medium mb-1">Juz</p>
+            <p class="text-2xl font-black text-text-main">{currentPosition.juz || 1}/30</p>
           </div>
         </div>
 
@@ -74,44 +77,27 @@ export const ProgressPage: FC<{
         <div class="w-full bg-white border border-border-light rounded-xl p-6 shadow-sm mb-8">
           <h2 class="text-text-main text-lg font-bold mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">edit_note</span>
-            Input Bacaan
+            Input Bacaan <br />(Mushaf Standar Usmani)
           </h2>
           <form method="post" action="/progress" class="flex flex-col sm:flex-row gap-4">
             <div class="flex-1">
               <label class="block text-text-secondary text-xs font-bold mb-1 uppercase tracking-wider">
-                Surah
-              </label>
-              <select
-                name="surah_number"
-                class="w-full bg-slate-50 text-text-main text-sm rounded-lg border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none py-2 px-3 transition-all"
-                required
-              >
-                <option value="">Pilih Surah...</option>
-                {SURAHS.map((s) => {
-                  const existing = entryMap.get(s.number);
-                  return (
-                    <option value={s.number}>
-                      {s.number}. {s.name} ({s.totalAyahs} ayat)
-                      {existing ? ` - terkini: ayat ${existing.last_ayah}` : ""}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-            <div class="w-full sm:w-40">
-              <label class="block text-text-secondary text-xs font-bold mb-1 uppercase tracking-wider">
-                Sampai Ayat
+                Halaman (1 - {TOTAL_PAGES})
               </label>
               <input
                 type="number"
-                name="last_ayah"
+                name="last_page"
                 min="1"
-                placeholder="cth. 141"
+                max={TOTAL_PAGES}
+                placeholder={`cth. ${Math.min(currentPosition.page + 1, TOTAL_PAGES)}`}
                 class="w-full bg-slate-50 text-text-main text-sm rounded-lg border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none py-2 px-3 transition-all"
                 required
               />
+              <p class="text-text-secondary text-xs mt-1">
+                Sekarang di: {currentPosition.page > 0 ? `Halaman ${currentPosition.page} - ${currentPosition.surahName}` : "Belum mulai"}
+              </p>
             </div>
-            <div class="flex items-end">
+            <div class="flex items-center">
               <button
                 type="submit"
                 class="w-full sm:w-auto px-6 py-2 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary-dark transition-colors shadow-sm"
@@ -130,32 +116,34 @@ export const ProgressPage: FC<{
             </h2>
           </div>
           <div class="divide-y divide-border-light">
-            {entries.length === 0 ? (
+            {history.length === 0 ? (
               <div class="px-6 py-12 text-center text-text-secondary">
                 <span class="material-symbols-outlined text-3xl mb-2">book</span>
                 <p>Belum ada progress. Mulai baca Al-Quran hari ini!</p>
               </div>
             ) : (
-              sortedEntries.map((entry) => {
-                const surah = getSurah(entry.surah_number);
-                if (!surah) return null;
+              history.map((item) => {
+                const pos = getPositionForPage(item.pageTo);
+                const surah = pos ? getSurah(pos.surah) : undefined;
+                const juz = pos ? getJuzForPosition(pos.surah, pos.ayah) : 1;
 
-                const date = new Date(entry.updated_at);
+                const date = new Date(item.loggedAt);
                 const timeStr = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-                const dateStr = date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+                const dateStr = date.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+                const isKhatam = item.pageTo >= TOTAL_PAGES;
 
                 return (
                   <div class="flex items-center justify-between px-6 py-3 hover:bg-slate-50 transition-colors">
                     <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
-                        {entry.surah_number}
+                      <div class={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isKhatam ? 'bg-green-100 text-green-600' : 'bg-primary/10 text-primary'}`}>
+                        {item.pageTo}
                       </div>
                       <div>
                         <p class="text-text-main text-sm font-medium">
-                          {surah.name} : {entry.last_ayah}
+                          {isKhatam ? '🎉 Khatam!' : `Halaman ${item.pageFrom} → ${item.pageTo}`}
                         </p>
                         <p class="text-text-secondary text-xs">
-                          {surah.nameArabic}
+                          {surah?.name || 'Unknown'} - Juz {juz}
                         </p>
                       </div>
                     </div>

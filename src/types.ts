@@ -21,8 +21,7 @@ export interface Session {
 export interface ProgressEntry {
   id: number;
   user_id: number;
-  surah_number: number;
-  last_ayah: number;
+  last_page: number;
   completed: number;
   created_at: string;
   updated_at: string;
@@ -31,9 +30,8 @@ export interface ProgressEntry {
 export interface ProgressLog {
   id: number;
   user_id: number;
-  surah_number: number;
-  ayah_from: number;
-  ayah_to: number;
+  page_from: number;
+  page_to: number;
   logged_at: string;
 }
 
@@ -49,6 +47,7 @@ export interface RankedUser {
   current_surah: string;
   current_surah_number: number;
   current_ayah: number;
+  current_juz?: number;
   trend: number;
   joined_label: string;
 }
